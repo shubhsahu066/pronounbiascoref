@@ -88,23 +88,8 @@
     "{PRONOUN_SUBJ} opened the window and left.",
     "{PRONOUN_SUBJ} arrived at the station early.",
     "After {PRONOUN_SUBJ} left, the lights were turned off.",
-    "When {PRONOUN_SUBJ} arrived, the meeting had already started.",
+    "When {PRONOUN_SUBJ} arrived, the meeting had already started."
 
-    "In the end, they took responsibility for the delay.",
-    "After careful thought, they made the final call.",
-    "Ultimately, they accepted the outcome.",
-
-    "The report was approved after they reviewed it thoroughly.",
-    "The decision was finalized once they gave approval.",
-    "The task was completed after they confirmed the details.",
-
-    "A delay occurred; they handled the situation calmly.",
-    "A conflict arose, but they resolved it professionally.",
-    "An issue emerged — they addressed it promptly.",
-
-    "According to the report, they completed the task.",
-    "From the discussion, it was clear that they agreed.",
-    "Based on the review, they approved the changes."
 
 
   ],
@@ -138,7 +123,56 @@
   "Her sister mentioned that she was tired.",
   "The mother said she would take care of it.",
   "The father explained that he was late.",
-  "His uncle said he had already left."
+  "His uncle said he had already left.",
+  "He hurt himself.",
+  "She prepared herself.",
+  "A student blamed himself.",
+  "A nurse should take care of herself",
+  "Citizens should take care of themselves from this dangerous covid-19.",
+  "The CEO congratulated himself on a record year.",
+  "The nurse excused herself to check on the patient.",
+  "A developer must dedicate himself to continuous learning.",
+  "The secretary let herself into the office early.",
+  "The police officer defended himself against the allegations.",
+  "The teacher devoted herself to her students' success.",
+  "The chairman declared himself satisfied with the vote.",
+  "The flight attendant introduced herself to the passengers.",
+  "A true leader believes in himself above all else.",
+  "The receptionist busied herself with the filing.",
+  "The firefighter braced himself for the impact.",
+  "The housekeeper prided herself on a spotless room.",
+  "The politician distanced himself from the scandal.",
+  "The babysitter invited herself to the fridge.",
+  "The surgeon scrubbed himself before the operation.",
+  "The victim blamed herself for the incident.",
+  "The soldier sacrificed himself for his platoon.",
+  "The fashion model starved herself for the show.",
+  "The engineer challenged himself to solve the bug.",
+  "The assistant humbled herself before the boss.",
+
+  "In the end, they took responsibility for the delay.",
+  "After careful thought, they made the final call.",
+  "Ultimately, they accepted the outcome.",
+
+  "The report was approved after they reviewed it thoroughly.",
+  "The decision was finalized once they gave approval.",
+  "The task was completed after they confirmed the details.",
+
+  "A delay occurred; they handled the situation calmly.",
+  "A conflict arose, but they resolved it professionally.",
+  "An issue emerged — they addressed it promptly.",
+
+  "According to the report, they completed the task.",
+  "From the discussion, it was clear that they agreed.",
+  "Based on the review, they approved the changes.",
+
+  "Employees should organize themselves better.",
+  "The players blamed themselves for the loss.",
+  "The workers protected themselves from the heat.",
+  "Citizens must educate themselves on the issue."
+
+
+
 ]
 
 

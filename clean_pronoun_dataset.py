@@ -29,6 +29,44 @@ UNGRAAMMATICAL_PATTERNS = [
 # HELPERS
 # -------------------------
 
+def clean_reflexive_spans(text, spans):
+    tokens = tokenize(text)
+
+    has_he_she = any(tok in {"he", "she"} for tok in tokens)
+
+    cleaned = []
+    for s in spans:
+        tok = text[s["start"]:s["end"]].lower()
+
+        # never mark themselves
+        if tok == "themselves":
+            continue
+
+        # if he/she exists, drop reflexive mark
+        if tok in {"himself", "herself"} and has_he_she:
+            continue
+
+        cleaned.append(s)
+
+    return cleaned
+
+
+def reflexive_type(text):
+    toks = tokenize(text)
+    has_himself = "himself" in toks
+    has_herself = "herself" in toks
+    has_themselves = "themselves" in toks
+    has_he_she = any(t in {"he", "she"} for t in toks)
+
+    if has_themselves:
+        return "THEMSELVES"
+    if (has_himself or has_herself) and has_he_she:
+        return "COREFERENT"
+    if (has_himself or has_herself) and not has_he_she:
+        return "BARE_REFLEXIVE"
+    return "NONE"
+
+
 def tokenize(text):
     return re.findall(r"\b\w+\b", text.lower())
 
@@ -36,7 +74,13 @@ def has_reflexive(text):
     return any(tok in REFLEXIVE_PRONOUNS for tok in tokenize(text))
 
 def count_gendered_pronouns(text):
-    return sum(1 for tok in tokenize(text) if tok in GENDERED_PRONOUNS)
+    toks = tokenize(text)
+    return sum(
+        1 for tok in toks
+        if tok in GENDERED_PRONOUNS
+        and tok not in {"himself", "herself"}
+    )
+
 
 def is_ungrammatical(text):
     t = text.lower()
@@ -77,6 +121,9 @@ with open("unclean_dataset.jsonl", "r", encoding="utf-8") as fin, \
         text = ex["text"]
         spans = ex.get("spans", [])
         bias_type = ex.get("bias_type", "")
+        #FIX REFLEXIVE SPANS
+        spans = clean_reflexive_spans(text, spans)
+        ex["spans"] = spans
 
         # 1. Duplicate texts
         if text in seen:
@@ -85,9 +132,21 @@ with open("unclean_dataset.jsonl", "r", encoding="utf-8") as fin, \
         seen.add(text)
 
         # 2. Reflexives (always dropped)
-        if has_reflexive(text):
-            stats["reflexive"] += 1
-            continue
+        rtype = reflexive_type(text)
+
+        # Drop ONLY themselves-based bias cases
+        if rtype == "THEMSELVES":
+            # must be neutral
+            if bias_type != "NEUTRAL":
+                stats["neutral_leak"] += 1
+                continue
+
+        # Require span ONLY for bare reflexives
+        if rtype == "BARE_REFLEXIVE":
+            if not span_contains_gendered(text, spans):
+                stats["span_mismatch"] += 1
+                continue
+
 
         # 3. Multiple gendered pronouns
         if count_gendered_pronouns(text) > 1:
