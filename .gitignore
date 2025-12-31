@@ -1,0 +1,31 @@
+# Git
+.git/
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ML models
+pronoun_model_roberta/
+*.pt
+*.bin
+*.ckpt
+*.safetensors
+
+# Datasets & outputs
+*.jsonl
+dataset.jsonl
+pronoun_dataset.jsonl
+
+# Logs & tracking
+wandb/
+*.log
+!generic_role_candidates.log
+
+.venv/
+.DS_Store
+.idea/
+
