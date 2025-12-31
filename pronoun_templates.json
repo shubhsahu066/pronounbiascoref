@@ -102,14 +102,34 @@
   ],
 
   "NAMED": [
-  "{NAME}, the manager, said he would review the file.",
-  "{NAME}, a teacher, mentioned that she was absent.",
-  "{NAME}, the doctor, confirmed that he approved the treatment.",
-  "{NAME} said he would arrive later.",
-  "{NAME} explained that she was unavailable.",
-  "{NAME} mentioned that he had already submitted the report.",
-  "{NAME} confirmed that she approved the decision.",
-  "{NAME} realized that he made a mistake."
+  "{MALE_NAME}, the manager, said he would review the file.",
+  "{FEMALE_NAME}, a teacher, mentioned that she was absent.",
+  "{MALE_NAME}, the doctor, confirmed that he approved the treatment.",
+  "{MALE_NAME} said he would arrive later.",
+  "{FEMALE_NAME} explained that she was unavailable.",
+  "{MALE_NAME} mentioned that he had already submitted the report.",
+  "{FEMALE_NAME} confirmed that she approved the decision.",
+  "{MALE_NAME} realized that he made a mistake.",
+
+  "{NAME} said {PRONOUN_SUBJ} would be really late.",
+  "{NAME} claimed that {PRONOUN_SUBJ} was dizzy.",
+  "{NAME} confirmed that {PRONOUN_SUBJ} will come to the party.",
+
+  "The manager informed {PRONOUN_OBJ} that the meeting was postponed, said {NAME}.",
+  "The supervisor reminded {PRONOUN_OBJ} about the deadline, according to {NAME}.",
+
+  
+  "{NAME} said that {PRONOUN_POS} work was complete.",
+  "{NAME} mentioned that {PRONOUN_POS} request had been approved.",
+  "{NAME} explained that {PRONOUN_POS} schedule had changed.",
+
+  "{NAME} said the final decision was {PRONOUN_POS_PRO}.",
+  "{NAME} confirmed that the responsibility was {PRONOUN_POS_PRO}.",
+
+  "{NAME} blamed {PRONOUN_REFL} for the mistake.",
+  "{NAME} prepared {PRONOUN_REFL} for the presentation."
+
+
 ],
 
   "STATIC": [

@@ -46,9 +46,8 @@ PRONOUN_FORMS = {
 
 ROLES = ["student", "nurse", "teacher", "citizen", "employee", "user"]
 
-# 🔑 NAME SPLIT (THIS IS THE ONLY NEW THING)
-MALE_NAMES = ["John", "Shubh", "Ravi", "Alex"]
-FEMALE_NAMES = ["Mary", "Anita", "Priya", "Ellie"]
+MALE_NAMES = ["John", "Shubh"]
+FEMALE_NAMES = ["Mary", "Anita"]
 
 GENDERED = {"he", "she", "him", "her", "his", "hers"}
 REFLEXIVES = {"himself", "herself"}
@@ -119,76 +118,54 @@ def generate_dataset(template_path, output_path):
                     }) + "\n")
                     continue
 
-                # ---------- NAMED (GENDER-CORRECT ONLY) ----------
-                name_list=MALE_NAMES+FEMALE_NAMES
-                if "{NAME}" in tmpl:
-                    if "he" in tmpl or "his" in tmpl or "him" in tmpl:
-                        name_list = MALE_NAMES
-                    elif "she" in tmpl or "her" in tmpl:
-                        name_list = FEMALE_NAMES
-                    else:
-                        continue  # safety
 
-                    for name in name_list:
-                        sent = tmpl.replace("{NAME}", name)
-                        spans = mark_spans(sent, GENDERED)
-                        fout.write(json.dumps({
-                            "text": sent,
-                            "spans": spans,
-                            "bias_type": "PRONOUN"
-                        }) + "\n")
-                    continue
+                # ---------- NAMED ----------
+                if "{NAME}" in tmpl or "{MALE_NAME}" in tmpl or "{FEMALE_NAME}" in tmpl:
 
-                # ---------- NAMED (STRICT GENDER CONTROL) ----------
-                if "{NAME}" in tmpl:
-                    # gender-flexible templates → paired generation
-                    pairs = [
-                        (MALE_NAMES, "he"),
-                        (FEMALE_NAMES, "she")
-                    ]
+                    has_refl = "{PRONOUN_REFL}" in tmpl
 
-                    for names, pron in pairs:
-                        sent_with_pron = tmpl.replace(
-                            " he ", f" {pron} "
-                        ).replace(
-                            " she ", f" {pron} "
-                        )
+                    # ---- MALE NAME TEMPLATES ----
+                    if "{MALE_NAME}" in tmpl or "{NAME}" in tmpl:
+                        for name in MALE_NAMES:
+                            pronouns = ["he"] if has_refl else ["he", "they"]
 
-                        for name in names:
-                            sent = sent_with_pron.replace("{NAME}", name)
-                            spans = mark_spans(sent, GENDERED)
+                            for p in pronouns:
+                                sent = tmpl.replace("{NAME}", name)\
+                                          .replace("{MALE_NAME}", name)\
+                                          .replace("{FEMALE_NAME}", name)
 
-                            fout.write(json.dumps({
-                                "text": sent,
-                                "spans": spans,
-                                "bias_type": "PRONOUN"
-                            }) + "\n")
-                    continue
+                                sent, spans = replace_pronouns(sent, p)
 
+                                if p == "they":
+                                    spans = []
 
-                if "{MALE_NAME}" in tmpl:
-                    for name in MALE_NAMES:
-                        sent = tmpl.replace("{MALE_NAME}", name)
-                        spans = mark_spans(sent, GENDERED)
+                                fout.write(json.dumps({
+                                    "text": sent,
+                                    "spans": spans,
+                                    "bias_type": "PRONOUN" if spans else "NEUTRAL"
+                                }) + "\n")
 
-                        fout.write(json.dumps({
-                            "text": sent,
-                            "spans": spans,
-                            "bias_type": "PRONOUN"
-                        }) + "\n")
-                    continue
+                    # ---- FEMALE NAME TEMPLATES ----
+                    if "{FEMALE_NAME}" in tmpl or "{NAME}" in tmpl:
+                        for name in FEMALE_NAMES:
+                            pronouns = ["she"] if has_refl else ["she", "they"]
 
+                            for p in pronouns:
+                                sent = tmpl.replace("{NAME}", name)\
+                                          .replace("{MALE_NAME}", name)\
+                                          .replace("{FEMALE_NAME}", name)
 
-                if "{FEMALE_NAME}" in tmpl:
-                    for name in FEMALE_NAMES:
-                        sent = tmpl.replace("{FEMALE_NAME}", name)
-                        spans = mark_spans(sent, GENDERED)
+                                sent, spans = replace_pronouns(sent, p)
 
-                        fout.write(json.dumps({
-                            "text": sent,
-                            "spans": spans,
-                            "bias_type": "PRONOUN"
-                        }) + "\n")
+                                if p == "they":
+                                    spans = []
+
+                                fout.write(json.dumps({
+                                    "text": sent,
+                                    "spans": spans,
+                                    "bias_type": "PRONOUN" if spans else "NEUTRAL"
+                                }) + "\n")
+
                     continue
 
 
@@ -204,11 +181,9 @@ def generate_dataset(template_path, output_path):
                         toks = tokenize(sent)
                         has_he_she = any(t in {"he", "she"} for t in toks)
 
-                        # neutralize they
                         if p == "they" or cat not in BIAS_CATEGORIES:
                             spans = []
 
-                        # bare reflexive → mark
                         if not has_he_she:
                             spans += mark_spans(sent, REFLEXIVES)
 
