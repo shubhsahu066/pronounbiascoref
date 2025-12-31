@@ -9,26 +9,14 @@ PRONOUN_MAP = {
     "he": {
         "{PRESENT_BE}": "is",
         "{PAST_BE}": "was",
-        "{HAVE_PRESENT}": "has",
-        "{HAVE_PAST}": "had",
-        "{DO_PRESENT}": "does",
-        "{DO_PAST}": "did"
     },
     "she": {
         "{PRESENT_BE}": "is",
         "{PAST_BE}": "was",
-        "{HAVE_PRESENT}": "has",
-        "{HAVE_PAST}": "had",
-        "{DO_PRESENT}": "does",
-        "{DO_PAST}": "did"
     },
     "they": {
         "{PRESENT_BE}": "are",
         "{PAST_BE}": "were",
-        "{HAVE_PRESENT}": "have",
-        "{HAVE_PAST}": "had",
-        "{DO_PRESENT}": "do",
-        "{DO_PAST}": "did"
     }
 }
 
@@ -57,14 +45,13 @@ PRONOUN_FORMS = {
 }
 
 ROLES = ["student", "nurse", "teacher", "citizen", "employee", "user"]
-NAMES = ["John", "Shubh", "Ravi"]
 
-GENDERED_TOKENS = {
-    "he", "she", "him", "her", "his", "hers",
-    "himself", "herself"
-}
+# 🔑 NAME SPLIT (THIS IS THE ONLY NEW THING)
+MALE_NAMES = ["John", "Shubh", "Ravi", "Alex"]
+FEMALE_NAMES = ["Mary", "Anita", "Priya", "Ellie"]
 
-REFLEXIVES_TO_MARK = {"himself", "herself"}
+GENDERED = {"he", "she", "him", "her", "his", "hers"}
+REFLEXIVES = {"himself", "herself"}
 
 BIAS_CATEGORIES = {
     "PRONOUN",
@@ -77,12 +64,13 @@ BIAS_CATEGORIES = {
 # HELPERS
 # -------------------------
 
+def tokenize(text):
+    return re.findall(r"\b\w+\b", text.lower())
 
-
-def mark_gendered_spans(text):
+def mark_spans(text, targets):
     spans = []
     for m in re.finditer(r"\b\w+\b", text):
-        if m.group(0).lower() in GENDERED_TOKENS:
+        if m.group(0).lower() in targets:
             spans.append({
                 "start": m.start(),
                 "end": m.end(),
@@ -90,111 +78,147 @@ def mark_gendered_spans(text):
             })
     return spans
 
-
-def add_reflexive_spans(text, spans):
-    lower = text.lower()
-    for refl in REFLEXIVES_TO_MARK:
-        start = 0
-        while True:
-            idx = lower.find(refl, start)
-            if idx == -1:
-                break
-            spans.append({
-                "start": idx,
-                "end": idx + len(refl),
-                "type": "PRONOUN"
-            })
-            start = idx + len(refl)
-    return spans
-
-
-def replace_pronouns(template, pronoun_sub):
-    sentence = template
+def replace_pronouns(template, pronoun):
+    sent = template
     spans = []
 
-    for k, v in PRONOUN_MAP[pronoun_sub].items():
-        sentence = sentence.replace(k, v)
+    for k, v in PRONOUN_MAP[pronoun].items():
+        sent = sent.replace(k, v)
 
-    for ph, word in PRONOUN_FORMS[pronoun_sub].items():
-        while ph in sentence:
-            idx = sentence.index(ph)
-            pron = word.capitalize() if idx == 0 else word
-            sentence = sentence[:idx] + pron + sentence[idx + len(ph):]
+    for ph, word in PRONOUN_FORMS[pronoun].items():
+        while ph in sent:
+            i = sent.index(ph)
+            w = word.capitalize() if i == 0 else word
+            sent = sent[:i] + w + sent[i+len(ph):]
             spans.append({
-                "start": idx,
-                "end": idx + len(pron),
+                "start": i,
+                "end": i + len(w),
                 "type": "PRONOUN"
             })
 
-    return sentence, spans
-
+    return sent, spans
 
 # -------------------------
 # GENERATOR
 # -------------------------
 
 def generate_dataset(template_path, output_path):
-    with open(template_path, "r", encoding="utf-8") as f:
-        templates = json.load(f)
+    templates = json.load(open(template_path))
 
-    dataset = []
+    with open(output_path, "w", encoding="utf-8") as fout:
+        for cat, sents in templates.items():
+            for tmpl in sents:
 
-    for category, sentence_list in templates.items():
-        for template in sentence_list:
-
-            # ---------- STATIC ----------
-            if category == "STATIC":
-                spans = mark_gendered_spans(template)
-                dataset.append({
-                    "text": template,
-                    "spans": spans,
-                    "bias_type": "PRONOUN" if spans else "NEUTRAL"
-                })
-                continue
-
-            # ---------- NAME ----------
-            if "{NAME}" in template:
-                for name in NAMES:
-                    sent = template.replace("{NAME}", name)
-                    spans = mark_gendered_spans(sent)
-                    dataset.append({
-                        "text": sent,
+                # ---------- STATIC ----------
+                if cat == "STATIC":
+                    spans = mark_spans(tmpl, GENDERED)
+                    fout.write(json.dumps({
+                        "text": tmpl,
                         "spans": spans,
                         "bias_type": "PRONOUN" if spans else "NEUTRAL"
-                    })
-                continue
+                    }) + "\n")
+                    continue
 
-            # ---------- ROLE ----------
-            role_variants = [template]
-            if "{ROLE}" in template:
-                role_variants = [
-                    template.replace("{ROLE}", role) for role in ROLES
-                ]
+                # ---------- NAMED (GENDER-CORRECT ONLY) ----------
+                name_list=MALE_NAMES+FEMALE_NAMES
+                if "{NAME}" in tmpl:
+                    if "he" in tmpl or "his" in tmpl or "him" in tmpl:
+                        name_list = MALE_NAMES
+                    elif "she" in tmpl or "her" in tmpl:
+                        name_list = FEMALE_NAMES
+                    else:
+                        continue  # safety
 
-            # ---------- PRONOUN SUB ----------
-            for tmpl in role_variants:
-                for pronoun_sub in ["he", "she", "they"]:
-                    sent, spans = replace_pronouns(tmpl, pronoun_sub)
+                    for name in name_list:
+                        sent = tmpl.replace("{NAME}", name)
+                        spans = mark_spans(sent, GENDERED)
+                        fout.write(json.dumps({
+                            "text": sent,
+                            "spans": spans,
+                            "bias_type": "PRONOUN"
+                        }) + "\n")
+                    continue
 
-                    # neutralize standard pronouns
-                    if pronoun_sub == "they" or category not in BIAS_CATEGORIES:
-                        spans = []
+                # ---------- NAMED (STRICT GENDER CONTROL) ----------
+                if "{NAME}" in tmpl:
+                    # gender-flexible templates → paired generation
+                    pairs = [
+                        (MALE_NAMES, "he"),
+                        (FEMALE_NAMES, "she")
+                    ]
 
-                    # always re-add himself / herself
-                    spans = add_reflexive_spans(sent, spans)
+                    for names, pron in pairs:
+                        sent_with_pron = tmpl.replace(
+                            " he ", f" {pron} "
+                        ).replace(
+                            " she ", f" {pron} "
+                        )
 
-                    dataset.append({
-                        "text": sent,
-                        "spans": spans,
-                        "bias_type": "PRONOUN" if spans else "NEUTRAL"
-                    })
+                        for name in names:
+                            sent = sent_with_pron.replace("{NAME}", name)
+                            spans = mark_spans(sent, GENDERED)
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        for ex in dataset:
-            f.write(json.dumps(ex, ensure_ascii=False) + "\n")
+                            fout.write(json.dumps({
+                                "text": sent,
+                                "spans": spans,
+                                "bias_type": "PRONOUN"
+                            }) + "\n")
+                    continue
 
-    print(f"Dataset generated: {len(dataset)} samples")
 
+                if "{MALE_NAME}" in tmpl:
+                    for name in MALE_NAMES:
+                        sent = tmpl.replace("{MALE_NAME}", name)
+                        spans = mark_spans(sent, GENDERED)
+
+                        fout.write(json.dumps({
+                            "text": sent,
+                            "spans": spans,
+                            "bias_type": "PRONOUN"
+                        }) + "\n")
+                    continue
+
+
+                if "{FEMALE_NAME}" in tmpl:
+                    for name in FEMALE_NAMES:
+                        sent = tmpl.replace("{FEMALE_NAME}", name)
+                        spans = mark_spans(sent, GENDERED)
+
+                        fout.write(json.dumps({
+                            "text": sent,
+                            "spans": spans,
+                            "bias_type": "PRONOUN"
+                        }) + "\n")
+                    continue
+
+
+                # ---------- ROLE ----------
+                role_variants = [tmpl]
+                if "{ROLE}" in tmpl:
+                    role_variants = [tmpl.replace("{ROLE}", r) for r in ROLES]
+
+                for rv in role_variants:
+                    for p in ["he", "she", "they"]:
+                        sent, spans = replace_pronouns(rv, p)
+
+                        toks = tokenize(sent)
+                        has_he_she = any(t in {"he", "she"} for t in toks)
+
+                        # neutralize they
+                        if p == "they" or cat not in BIAS_CATEGORIES:
+                            spans = []
+
+                        # bare reflexive → mark
+                        if not has_he_she:
+                            spans += mark_spans(sent, REFLEXIVES)
+
+                        fout.write(json.dumps({
+                            "text": sent,
+                            "spans": spans,
+                            "bias_type": "PRONOUN" if spans else "NEUTRAL"
+                        }) + "\n")
+
+    print("Dataset generation complete")
 
 if __name__ == "__main__":
     generate_dataset("pronoun_templates.json", "unclean_dataset.jsonl")
