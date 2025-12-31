@@ -1,0 +1,146 @@
+{
+  "PRONOUN": [
+    "{PRONOUN_SUBJ} {PRESENT_BE} responsible for managing the project.",
+    "{PRONOUN_SUBJ} led the initiative successfully.",
+    "{PRONOUN_SUBJ} oversaw the operation last year.",
+    "{PRONOUN_SUBJ} should review the document.",
+    "{PRONOUN_SUBJ} can resolve complex issues.",
+
+    "The final authority was {PRONOUN_POS_PRO}.",
+    "Final accountability lay with {PRONOUN_OBJ}.",
+    "Ultimate responsibility rested with {PRONOUN_OBJ}.",
+    "Control over the outcome was entirely {PRONOUN_POS_PRO}.",
+    "Ownership of the decision was clearly {PRONOUN_POS_PRO}.",
+
+    "{PRONOUN_SUBJ} told {PRONOUN_OBJ} that {PRONOUN_SUBJ} should decide.",
+    "{PRONOUN_SUBJ} reminded {PRONOUN_OBJ} that {PRONOUN_SUBJ} {PAST_BE} responsible.",
+
+    "{PRONOUN_SUBJ} challenged {PRONOUN_REFL} to improve.",
+    "{PRONOUN_SUBJ} prepared {PRONOUN_REFL} for the presentation.",
+
+    "When a student applies, {PRONOUN_POS} guardian should take care of admission.",
+    "A student must submit {PRONOUN_POS} homework.",
+    "Every citizen must pay {PRONOUN_POS} taxes on time.",
+    "Each student is responsible for {PRONOUN_POS} own locker.",
+    "Every developer works on {PRONOUN_POS} account.",
+
+    "A nurse should take care of {PRONOUN_POS} health.",
+    "A teacher often spends {PRONOUN_POS} own money on supplies.",
+    "A politician should always keep {PRONOUN_POS} promises.",
+
+    "When a child learns to read, {PRONOUN_SUBJ} opens a new world.",
+    "The customer is always right, and {PRONOUN_SUBJ} deserves respect.",
+
+    "The final authority is {PRONOUN_POS_PRO}.",
+    "The decision was entirely {PRONOUN_POS_PRO}.",
+    "The responsibility belonged to {PRONOUN_OBJ}.",
+
+    "In the end, {PRONOUN_SUBJ} took responsibility for the delay.",
+    "After careful thought, {PRONOUN_SUBJ} made the final call.",
+    "Ultimately, {PRONOUN_SUBJ} accepted the outcome.",
+
+    "The report was approved after {PRONOUN_SUBJ} reviewed it thoroughly.",
+    "The decision was finalized once {PRONOUN_SUBJ} gave approval.",
+    "The task was completed after {PRONOUN_SUBJ} confirmed the details.",
+
+    "A delay occurred; {PRONOUN_SUBJ} handled the situation calmly.",
+    "A conflict arose, but {PRONOUN_SUBJ} resolved it professionally.",
+    "An issue emerged — {PRONOUN_SUBJ} addressed it promptly.",
+
+    "According to the report, {PRONOUN_SUBJ} completed the task.",
+    "From the discussion, it was clear that {PRONOUN_SUBJ} agreed.",
+    "Based on the review, {PRONOUN_SUBJ} approved the changes."
+
+
+  ],
+
+  "GENERIC_ROLE_POSSESSIVE": [
+    "A {ROLE} should complete {PRONOUN_POS} assignment.",
+    "Each {ROLE} must submit {PRONOUN_POS} work on time.",
+    "Every {ROLE} is responsible for {PRONOUN_POS} actions.",
+    "A {ROLE} should take care of {PRONOUN_POS} duties.",
+    "Each {ROLE} must manage {PRONOUN_POS} responsibilities carefully."
+  ],
+
+  "GENERIC_ROLE_REFLEXIVE": [
+    "A {ROLE} should prepare {PRONOUN_REFL} for challenges.",
+    "Each {ROLE} must motivate {PRONOUN_REFL} to improve.",
+    "Every {ROLE} should train {PRONOUN_REFL} regularly.",
+    "A {ROLE} must discipline {PRONOUN_REFL} when required."
+  ],
+
+  "GENERIC_ROLE_SUBJECT_CONTINUATION": [
+    "When a {ROLE} arrives, {PRONOUN_SUBJ} should report immediately.",
+    "If a {ROLE} makes a mistake, {PRONOUN_SUBJ} must correct it.",
+    "After a {ROLE} finishes work, {PRONOUN_SUBJ} should document it.",
+    "When a {ROLE} is assigned a task, {PRONOUN_SUBJ} must complete it."
+  ],
+
+  "GENERIC_ROLE_NEUTRAL_CONTROL": [
+    "A {ROLE} should submit their assignment.",
+    "Each {ROLE} must complete their work on time.",
+    "Every {ROLE} is responsible for their actions.",
+    "A {ROLE} should take care of their responsibilities."
+  ],
+
+  "NEUTRAL_PRONOUN": [
+    "{PRONOUN_SUBJ} walked into the room quietly.",
+    "{PRONOUN_SUBJ} opened the window and left.",
+    "{PRONOUN_SUBJ} arrived at the station early.",
+    "After {PRONOUN_SUBJ} left, the lights were turned off.",
+    "When {PRONOUN_SUBJ} arrived, the meeting had already started.",
+
+    "In the end, they took responsibility for the delay.",
+    "After careful thought, they made the final call.",
+    "Ultimately, they accepted the outcome.",
+
+    "The report was approved after they reviewed it thoroughly.",
+    "The decision was finalized once they gave approval.",
+    "The task was completed after they confirmed the details.",
+
+    "A delay occurred; they handled the situation calmly.",
+    "A conflict arose, but they resolved it professionally.",
+    "An issue emerged — they addressed it promptly.",
+
+    "According to the report, they completed the task.",
+    "From the discussion, it was clear that they agreed.",
+    "Based on the review, they approved the changes."
+
+
+  ],
+
+  "FILLER": [
+    "{PRONOUN_SUBJ} arrived on time.",
+    "{PRONOUN_SUBJ} completed the task.",
+    "{PRONOUN_SUBJ} left the building.",
+    "{PRONOUN_SUBJ} waited in the hallway."
+  ],
+
+  "NAMED": [
+  "{NAME}, the manager, said he would review the file.",
+  "{NAME}, a teacher, mentioned that she was absent.",
+  "{NAME}, the doctor, confirmed that he approved the treatment.",
+  "{NAME} said he would arrive later.",
+  "{NAME} explained that she was unavailable.",
+  "{NAME} mentioned that he had already submitted the report.",
+  "{NAME} confirmed that she approved the decision.",
+  "{NAME} realized that he made a mistake."
+],
+
+  "STATIC": [
+  "The man said he would return tomorrow.",
+  "The woman explained that she needed more time.",
+  "The boy admitted that he broke the window.",
+  "The girl said she finished the assignment.",
+  "The father said he would handle the situation.",
+
+  "My brother said he would call later.",
+  "Her sister mentioned that she was tired.",
+  "The mother said she would take care of it.",
+  "The father explained that he was late.",
+  "His uncle said he had already left."
+]
+
+
+
+}
