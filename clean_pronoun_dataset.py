@@ -1,15 +1,16 @@
 import json
 import re
 
-INPUT_FILE = "pronoun_dataset.jsonl"
-OUTPUT_FILE = "pronoun_dataset_clean.jsonl"
+INPUT_FILE = "unclean_dataset.jsonl"
+OUTPUT_FILE = "dataset.jsonl"
 
 # -------------------------
 # CONFIG
 # -------------------------
 
+# UPDATED: Added reflexives so they count as gendered tokens
 GENDERED_PRONOUNS = {
-    "he", "she", "him", "her", "his", "hers"
+    "he", "she", "him", "her", "his", "hers", "himself", "herself"
 }
 
 REFLEXIVE_PRONOUNS = {
@@ -21,7 +22,7 @@ UNGRAAMMATICAL_PATTERNS = [
     r"\bthey\s+is\b",
     r"\bthey\s+was\b",
     r"\bthey\s+deserves\b",
-    r"\ba\s+[aeiou]\w*",      # "a employee"
+    r"\ba\s+[aeiou]\w*",      
     r"\ban\s+[bcdfghjklmnpqrstvwxyz]\w*",
 ]
 
@@ -29,27 +30,27 @@ UNGRAAMMATICAL_PATTERNS = [
 # HELPERS
 # -------------------------
 
+def tokenize(text):
+    return re.findall(r"\b\w+\b", text.lower())
+
 def clean_reflexive_spans(text, spans):
     tokens = tokenize(text)
-
     has_he_she = any(tok in {"he", "she"} for tok in tokens)
 
     cleaned = []
     for s in spans:
         tok = text[s["start"]:s["end"]].lower()
 
-        # never mark themselves
         if tok == "themselves":
             continue
 
-        # if he/she exists, drop reflexive mark
+        # RULE: If he/she exists, drop reflexive mark (keep only he/she)
         if tok in {"himself", "herself"} and has_he_she:
             continue
 
         cleaned.append(s)
 
     return cleaned
-
 
 def reflexive_type(text):
     toks = tokenize(text)
@@ -58,33 +59,13 @@ def reflexive_type(text):
     has_themselves = "themselves" in toks
     has_he_she = any(t in {"he", "she"} for t in toks)
 
-    if has_themselves:
-        return "THEMSELVES"
-    if (has_himself or has_herself) and has_he_she:
-        return "COREFERENT"
-    if (has_himself or has_herself) and not has_he_she:
-        return "BARE_REFLEXIVE"
+    if has_themselves: return "THEMSELVES"
+    if (has_himself or has_herself) and has_he_she: return "COREFERENT"
+    if (has_himself or has_herself) and not has_he_she: return "BARE_REFLEXIVE"
     return "NONE"
 
-
-def tokenize(text):
-    return re.findall(r"\b\w+\b", text.lower())
-
-def has_reflexive(text):
-    return any(tok in REFLEXIVE_PRONOUNS for tok in tokenize(text))
-
-def count_gendered_pronouns(text):
-    toks = tokenize(text)
-    return sum(
-        1 for tok in toks
-        if tok in GENDERED_PRONOUNS
-        and tok not in {"himself", "herself"}
-    )
-
-
-def is_ungrammatical(text):
-    t = text.lower()
-    return any(re.search(p, t) for p in UNGRAAMMATICAL_PATTERNS)
+def text_contains_gendered(text):
+    return any(tok in GENDERED_PRONOUNS for tok in tokenize(text))
 
 def span_contains_gendered(text, spans):
     for s in spans:
@@ -93,8 +74,13 @@ def span_contains_gendered(text, spans):
             return True
     return False
 
-def text_contains_gendered(text):
-    return any(tok in GENDERED_PRONOUNS for tok in tokenize(text))
+def count_gendered_pronouns(text):
+    toks = tokenize(text)
+    return sum(1 for tok in toks if tok in GENDERED_PRONOUNS and tok not in REFLEXIVE_PRONOUNS)
+
+def is_ungrammatical(text):
+    t = text.lower()
+    return any(re.search(p, t) for p in UNGRAAMMATICAL_PATTERNS)
 
 # -------------------------
 # CLEANING PIPELINE
@@ -102,18 +88,13 @@ def text_contains_gendered(text):
 
 seen = set()
 stats = {
-    "total": 0,
-    "duplicates": 0,
-    "reflexive": 0,
-    "multi_pronoun": 0,
-    "ungrammatical": 0,
-    "span_mismatch": 0,
-    "neutral_leak": 0,
-    "kept": 0
+    "total": 0, "duplicates": 0, "reflexive": 0,
+    "multi_pronoun": 0, "ungrammatical": 0,
+    "span_mismatch": 0, "neutral_leak": 0, "kept": 0
 }
 
-with open("unclean_dataset.jsonl", "r", encoding="utf-8") as fin, \
-     open("dataset.jsonl", "w", encoding="utf-8") as fout:
+with open(INPUT_FILE, "r", encoding="utf-8") as fin, \
+     open(OUTPUT_FILE, "w", encoding="utf-8") as fout:
 
     for line in fin:
         stats["total"] += 1
@@ -121,39 +102,30 @@ with open("unclean_dataset.jsonl", "r", encoding="utf-8") as fin, \
         text = ex["text"]
         spans = ex.get("spans", [])
         bias_type = ex.get("bias_type", "")
-        #FIX REFLEXIVE SPANS
+
+        # Apply span rules
         spans = clean_reflexive_spans(text, spans)
         ex["spans"] = spans
 
-        # 1. Duplicate texts
+        # 1. Duplicates
         if text in seen:
             stats["duplicates"] += 1
             continue
         seen.add(text)
 
-        # 2. Reflexives (always dropped)
+        # 2. Reflexive Logic
         rtype = reflexive_type(text)
-
-        # Drop ONLY themselves-based bias cases
         if rtype == "THEMSELVES":
-            # must be neutral
             if bias_type != "NEUTRAL":
                 stats["neutral_leak"] += 1
                 continue
 
-        # Require span ONLY for bare reflexives
-        if rtype == "BARE_REFLEXIVE":
-            if not span_contains_gendered(text, spans):
-                stats["span_mismatch"] += 1
-                continue
-
-
-        # 3. Multiple gendered pronouns
+        # 3. Multi pronoun check
         if count_gendered_pronouns(text) > 1:
             stats["multi_pronoun"] += 1
             continue
 
-        # 4. Ungrammatical generation noise
+        # 4. Grammar check
         if is_ungrammatical(text):
             stats["ungrammatical"] += 1
             continue
@@ -161,22 +133,26 @@ with open("unclean_dataset.jsonl", "r", encoding="utf-8") as fin, \
         has_gendered_token = text_contains_gendered(text)
         has_gendered_span = span_contains_gendered(text, spans)
 
-        # 5. Gendered pronoun exists but model didn't mark it
+        # 5. Span Mismatch (Token exists but not marked)
         if has_gendered_token and not has_gendered_span:
-            stats["span_mismatch"] += 1
-            continue
+            # Exception: If it is a NAMED reflexive (Bare reflexive + Neutral), allow it.
+            if rtype == "BARE_REFLEXIVE" and bias_type == "NEUTRAL":
+                pass 
+            else:
+                stats["span_mismatch"] += 1
+                continue
 
-        # 6. Neutral sentence leaking gender
+        # 6. Neutral Leak (Marked Neutral but has gender)
         if bias_type == "NEUTRAL" and has_gendered_token:
-            stats["neutral_leak"] += 1
-            continue
+            # RULE: Allow "John hurt himself" (Bare Reflexive + Neutral) to pass
+            if rtype == "BARE_REFLEXIVE":
+                pass
+            else:
+                stats["neutral_leak"] += 1
+                continue
 
         fout.write(json.dumps(ex, ensure_ascii=False) + "\n")
         stats["kept"] += 1
-
-# -------------------------
-# REPORT
-# -------------------------
 
 print("\nCLEANING COMPLETE\n")
 for k, v in stats.items():

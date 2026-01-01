@@ -102,8 +102,8 @@
   ],
 
   "NAMED": [
-  "{MALE_NAME}, the manager, said he would review the file.",
-  "{FEMALE_NAME}, a teacher, mentioned that she was absent.",
+  
+
   "{MALE_NAME}, the doctor, confirmed that he approved the treatment.",
   "{MALE_NAME} said he would arrive later.",
   "{FEMALE_NAME} explained that she was unavailable.",
@@ -111,6 +111,7 @@
   "{FEMALE_NAME} confirmed that she approved the decision.",
   "{MALE_NAME} realized that he made a mistake.",
 
+  "{FEMALE_NAME}, a teacher, mentioned that {PRONOUN_SUBJ} was absent.",
   "{NAME} said {PRONOUN_SUBJ} would be really late.",
   "{NAME} claimed that {PRONOUN_SUBJ} was dizzy.",
   "{NAME} confirmed that {PRONOUN_SUBJ} will come to the party.",

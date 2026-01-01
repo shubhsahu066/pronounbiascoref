@@ -6,57 +6,40 @@ import re
 # -------------------------
 
 PRONOUN_MAP = {
-    "he": {
-        "{PRESENT_BE}": "is",
-        "{PAST_BE}": "was",
-    },
-    "she": {
-        "{PRESENT_BE}": "is",
-        "{PAST_BE}": "was",
-    },
-    "they": {
-        "{PRESENT_BE}": "are",
-        "{PAST_BE}": "were",
-    }
+    "he": {"{PRESENT_BE}": "is", "{PAST_BE}": "was"},
+    "she": {"{PRESENT_BE}": "is", "{PAST_BE}": "was"},
+    "they": {"{PRESENT_BE}": "are", "{PAST_BE}": "were"}
 }
 
 PRONOUN_FORMS = {
     "he": {
-        "{PRONOUN_SUBJ}": "he",
-        "{PRONOUN_OBJ}": "him",
-        "{PRONOUN_POS}": "his",
-        "{PRONOUN_POS_PRO}": "his",
+        "{PRONOUN_SUBJ}": "he", "{PRONOUN_OBJ}": "him",
+        "{PRONOUN_POS}": "his", "{PRONOUN_POS_PRO}": "his",
         "{PRONOUN_REFL}": "himself"
     },
     "she": {
-        "{PRONOUN_SUBJ}": "she",
-        "{PRONOUN_OBJ}": "her",
-        "{PRONOUN_POS}": "her",
-        "{PRONOUN_POS_PRO}": "hers",
+        "{PRONOUN_SUBJ}": "she", "{PRONOUN_OBJ}": "her",
+        "{PRONOUN_POS}": "her", "{PRONOUN_POS_PRO}": "hers",
         "{PRONOUN_REFL}": "herself"
     },
     "they": {
-        "{PRONOUN_SUBJ}": "they",
-        "{PRONOUN_OBJ}": "them",
-        "{PRONOUN_POS}": "their",
-        "{PRONOUN_POS_PRO}": "theirs",
+        "{PRONOUN_SUBJ}": "they", "{PRONOUN_OBJ}": "them",
+        "{PRONOUN_POS}": "their", "{PRONOUN_POS_PRO}": "theirs",
         "{PRONOUN_REFL}": "themselves"
     }
 }
 
 ROLES = ["student", "nurse", "teacher", "citizen", "employee", "user"]
-
 MALE_NAMES = ["John", "Shubh"]
 FEMALE_NAMES = ["Mary", "Anita"]
 
-GENDERED = {"he", "she", "him", "her", "his", "hers"}
+# UPDATED: Includes reflexives so mark_spans can initially find them
+GENDERED = {"he", "she", "him", "her", "his", "hers", "himself", "herself"}
 REFLEXIVES = {"himself", "herself"}
 
 BIAS_CATEGORIES = {
-    "PRONOUN",
-    "GENERIC_ROLE_POSSESSIVE",
-    "GENERIC_ROLE_REFLEXIVE",
-    "GENERIC_ROLE_SUBJECT_CONTINUATION"
+    "PRONOUN", "GENERIC_ROLE_POSSESSIVE",
+    "GENERIC_ROLE_REFLEXIVE", "GENERIC_ROLE_SUBJECT_CONTINUATION"
 }
 
 # -------------------------
@@ -79,8 +62,8 @@ def mark_spans(text, targets):
 
 def replace_pronouns(template, pronoun):
     sent = template
-    spans = []
-
+    
+    # 1. Perform Substitutions (Standard logic)
     for k, v in PRONOUN_MAP[pronoun].items():
         sent = sent.replace(k, v)
 
@@ -89,13 +72,43 @@ def replace_pronouns(template, pronoun):
             i = sent.index(ph)
             w = word.capitalize() if i == 0 else word
             sent = sent[:i] + w + sent[i+len(ph):]
-            spans.append({
-                "start": i,
-                "end": i + len(w),
-                "type": "PRONOUN"
-            })
+            # We don't track spans here anymore; we do it globally at the end
+            
+    # 2. THE TWEAK: Scan the final sentence for ALL target pronouns
+    # This catches both the substituted ones AND the hardcoded ones
+    target_words = set(PRONOUN_FORMS[pronoun].values())
+    
+    # Use the existing mark_spans helper to find them
+    spans = mark_spans(sent, target_words)
 
     return sent, spans
+
+def filter_spans(text, spans, is_named=False):
+    """
+    Applies the user's specific rules:
+    1. If NAMED, remove all reflexive spans.
+    2. If HE/SHE present, remove reflexive spans (keep only he/she).
+    3. If NO he/she and NOT named, keep reflexive spans.
+    """
+    toks = set(tokenize(text))
+    has_he_she = "he" in toks or "she" in toks
+    
+    new_spans = []
+    for s in spans:
+        word = text[s['start']:s['end']].lower()
+        is_reflexive = word in REFLEXIVES
+        
+        # Rule: If with a name, don't mark reflexives
+        if is_named and is_reflexive:
+            continue
+            
+        # Rule: If he/she is present, don't mark reflexives
+        if has_he_she and is_reflexive:
+            continue
+            
+        new_spans.append(s)
+        
+    return new_spans
 
 # -------------------------
 # GENERATOR
@@ -111,6 +124,9 @@ def generate_dataset(template_path, output_path):
                 # ---------- STATIC ----------
                 if cat == "STATIC":
                     spans = mark_spans(tmpl, GENDERED)
+                    # Apply logic to drop reflexives if needed
+                    spans = filter_spans(tmpl, spans, is_named=False)
+                    
                     fout.write(json.dumps({
                         "text": tmpl,
                         "spans": spans,
@@ -121,51 +137,34 @@ def generate_dataset(template_path, output_path):
 
                 # ---------- NAMED ----------
                 if "{NAME}" in tmpl or "{MALE_NAME}" in tmpl or "{FEMALE_NAME}" in tmpl:
-
                     has_refl = "{PRONOUN_REFL}" in tmpl
-
-                    # ---- MALE NAME TEMPLATES ----
+                    
+                    name_sets = []
                     if "{MALE_NAME}" in tmpl or "{NAME}" in tmpl:
-                        for name in MALE_NAMES:
-                            pronouns = ["he"] if has_refl else ["he", "they"]
-
-                            for p in pronouns:
-                                sent = tmpl.replace("{NAME}", name)\
-                                          .replace("{MALE_NAME}", name)\
-                                          .replace("{FEMALE_NAME}", name)
-
-                                sent, spans = replace_pronouns(sent, p)
-
-                                if p == "they":
-                                    spans = []
-
-                                fout.write(json.dumps({
-                                    "text": sent,
-                                    "spans": spans,
-                                    "bias_type": "PRONOUN" if spans else "NEUTRAL"
-                                }) + "\n")
-
-                    # ---- FEMALE NAME TEMPLATES ----
+                        name_sets.append((MALE_NAMES, ["he"] if has_refl else ["he", "they"]))
                     if "{FEMALE_NAME}" in tmpl or "{NAME}" in tmpl:
-                        for name in FEMALE_NAMES:
-                            pronouns = ["she"] if has_refl else ["she", "they"]
+                        name_sets.append((FEMALE_NAMES, ["she"] if has_refl else ["she", "they"]))
 
+                    for names, pronouns in name_sets:
+                        for name in names:
                             for p in pronouns:
                                 sent = tmpl.replace("{NAME}", name)\
                                           .replace("{MALE_NAME}", name)\
                                           .replace("{FEMALE_NAME}", name)
 
-                                sent, spans = replace_pronouns(sent, p)
-
+                                sent, raw_spans = replace_pronouns(sent, p)
+                                
                                 if p == "they":
-                                    spans = []
+                                    final_spans = []
+                                else:
+                                    # CRITICAL: Pass is_named=True to drop reflexives
+                                    final_spans = filter_spans(sent, raw_spans, is_named=True)
 
                                 fout.write(json.dumps({
                                     "text": sent,
-                                    "spans": spans,
-                                    "bias_type": "PRONOUN" if spans else "NEUTRAL"
+                                    "spans": final_spans,
+                                    "bias_type": "PRONOUN" if final_spans else "NEUTRAL"
                                 }) + "\n")
-
                     continue
 
 
@@ -176,21 +175,25 @@ def generate_dataset(template_path, output_path):
 
                 for rv in role_variants:
                     for p in ["he", "she", "they"]:
-                        sent, spans = replace_pronouns(rv, p)
-
-                        toks = tokenize(sent)
-                        has_he_she = any(t in {"he", "she"} for t in toks)
+                        sent, raw_spans = replace_pronouns(rv, p)
 
                         if p == "they" or cat not in BIAS_CATEGORIES:
-                            spans = []
+                            raw_spans = []
+                        else:
+                            # Add reflexives if they weren't added by replace_pronouns
+                            # (e.g. "A nurse prepared herself")
+                            raw_spans += mark_spans(sent, REFLEXIVES)
+                            # Deduplicate spans based on start index
+                            unique_spans = {s['start']: s for s in raw_spans}.values()
+                            raw_spans = list(unique_spans)
 
-                        if not has_he_she:
-                            spans += mark_spans(sent, REFLEXIVES)
+                        # Apply filtering rules (Rule 1 & 3)
+                        final_spans = filter_spans(sent, raw_spans, is_named=False)
 
                         fout.write(json.dumps({
                             "text": sent,
-                            "spans": spans,
-                            "bias_type": "PRONOUN" if spans else "NEUTRAL"
+                            "spans": final_spans,
+                            "bias_type": "PRONOUN" if final_spans else "NEUTRAL"
                         }) + "\n")
 
     print("Dataset generation complete")
