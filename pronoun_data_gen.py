@@ -85,10 +85,9 @@ def replace_pronouns(template, pronoun):
 
 def filter_spans(text, spans, is_named=False):
     """
-    Applies the user's specific rules:
-    1. If NAMED, remove all reflexive spans.
-    2. If HE/SHE present, remove reflexive spans (keep only he/she).
-    3. If NO he/she and NOT named, keep reflexive spans.
+    Applies the specific user rules:
+    1. If HE/SHE present, remove reflexive spans (Rule 1: Priority).
+    2. If NO he/she, keep reflexive spans even if named (Rule 4: Name + Reflexive is Bias).
     """
     toks = set(tokenize(text))
     has_he_she = "he" in toks or "she" in toks
@@ -98,11 +97,10 @@ def filter_spans(text, spans, is_named=False):
         word = text[s['start']:s['end']].lower()
         is_reflexive = word in REFLEXIVES
         
-        # Rule: If with a name, don't mark reflexives
-        if is_named and is_reflexive:
-            continue
-            
-        # Rule: If he/she is present, don't mark reflexives
+        # REMOVED: The check that skipped reflexives for named entities.
+        # Now, "John hurt himself" will keep the "himself" span.
+
+        # Rule: If he/she is present, don't mark reflexives (only mark the subject)
         if has_he_she and is_reflexive:
             continue
             

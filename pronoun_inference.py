@@ -52,7 +52,7 @@ def detect_pronoun_bias(text):
 
         span_text = text[start:end]
 
-        if span_text in NEUTRAL_PRONOUNS or span_text in REFLEXIVE_PRONOUNS:
+        if span_text in NEUTRAL_PRONOUNS :
             continue
 
         if span_text not in VALID_BIASED_PRONOUNS:
@@ -180,6 +180,8 @@ if __name__ == "__main__":
         "Shubh hurt himself",
         "Shubh thought he would win.",
         "John hurt himself",
+        "The customer, he hurt himself.",
+        "HE should really avoid being full of himself all the time."
     ]
 
     for e in examples:
