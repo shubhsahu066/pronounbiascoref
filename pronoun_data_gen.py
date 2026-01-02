@@ -72,13 +72,9 @@ def replace_pronouns(template, pronoun):
             i = sent.index(ph)
             w = word.capitalize() if i == 0 else word
             sent = sent[:i] + w + sent[i+len(ph):]
-            # We don't track spans here anymore; we do it globally at the end
+
             
-    # 2. THE TWEAK: Scan the final sentence for ALL target pronouns
-    # This catches both the substituted ones AND the hardcoded ones
     target_words = set(PRONOUN_FORMS[pronoun].values())
-    
-    # Use the existing mark_spans helper to find them
     spans = mark_spans(sent, target_words)
 
     return sent, spans
