@@ -146,13 +146,23 @@ def has_generic_subject(sentence: str) -> bool:
 
 
 def is_predicate_possessive(sentence: str, pronoun: str) -> bool:
+    # Filter only relevant possessive pronouns
     if pronoun.lower() not in {"his", "hers", "theirs"}:
         return False
 
-    words = sentence.lower().split()
-    for i in range(len(words) - 1):
-        if words[i] in COPULAR_VERBS and words[i + 1] == pronoun.lower():
-            return True
+    # Use the global nlp object to parse (handles "his." correctly)
+    doc = nlp(sentence)
+    
+    for i, token in enumerate(doc):
+        # Match the detected pronoun
+        if token.text.lower() == pronoun.lower():
+            # Check the immediate previous token
+            if i > 0:
+                prev_token = doc[i - 1]
+                # Check if previous word is "is", "was", "are", "were"
+                if prev_token.text.lower() in COPULAR_VERBS:
+                    return True
+                    
     return False
 
 
