@@ -1,18 +1,17 @@
-from allennlp.predictors import Predictor
-import allennlp_models.coref
+from fastcoref import FCoref
 
 class CorefResolver:
     def __init__(self):
-        self.predictor = Predictor.from_path(
-            "https://storage.googleapis.com/allennlp-public-models/"
-            "coref-spanbert-large-2021.03.10.tar.gz"
-        )
+        self.model = FCoref()
 
     def resolve(self, text: str):
-        """
-        Returns:
-          document: list of tokens
-          clusters: list of [start, end] token spans
-        """
-        output = self.predictor.predict(document=text)
-        return output["document"], output["clusters"]
+        pred = self.model.predict(
+            texts=[text],
+            is_split_into_words=False
+        )[0]
+
+        # FastCoref-safe outputs
+        clusters = pred.get_clusters(as_strings=False)
+        document = text  # we keep raw text, not tokens
+
+        return document, clusters

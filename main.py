@@ -1,5 +1,5 @@
 from coref_solver import CorefResolver
-from inference import detect_pronoun_bias
+from pronoun_inference import detect_pronoun_bias
 
 text = """
 Senior Software Engineer with 6 years experience.
