@@ -29,3 +29,5 @@ wandb/
 .DS_Store
 .idea/
 
+bias_report.html
+
