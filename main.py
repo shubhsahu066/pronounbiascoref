@@ -2442,9 +2442,22 @@ sentences = [
     # print(len(sentences))
 
 test_docs=test_docs+sentences+pronoun_bias_sentences
+test_doxs= [
+  "The leader who manages distributed teams understands cultural differences and respects diverse perspectives, ensuring that his leadership remains effective.",
+  "The manager was reviewing the reports yesterday when she noticed an inconsistency, but the manager who oversees compliance ensures that his team follows established protocols.",
+  """A great executive knows that the culture of the company is his responsibility.
+He should not hide behind spreadsheets; he must be visible on the factory floor.
+Whether he is negotiating a merger or fixing a conveyor belt, his attitude sets the tone for the entire organization.""",
+  "A cashier scans his customer's items.",
+  "Each loader stacks his pallets securely.",
+  "The mother, she knows best.",
+  "The teacher, he is strict.",
+  "If a manager is male, he evaluates performance; if female, she does the same.",
+  "A realtor showed his properties to buyers.",
+]
  
 
-for i, text in enumerate(test_docs):
+for i, text in enumerate(test_doxs):
     clusters = resolver.resolve(text)
     biases = detect_pronoun_bias(text, clusters)
     
