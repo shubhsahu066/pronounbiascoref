@@ -2441,7 +2441,7 @@ sentences = [
  
     # print(len(sentences))
 
-test_docs=test_docs+sentences+pronoun_bias_sentences
+# test_docs=test_docs+sentences+pronoun_bias_sentences
 test_doxs= [
   "The leader who manages distributed teams understands cultural differences and respects diverse perspectives, ensuring that his leadership remains effective.",
   "The manager was reviewing the reports yesterday when she noticed an inconsistency, but the manager who oversees compliance ensures that his team follows established protocols.",
@@ -2457,7 +2457,82 @@ Whether he is negotiating a merger or fixing a conveyor belt, his attitude sets 
 ]
  
 
-for i, text in enumerate(test_doxs):
+long_test_resume = """
+RESUME: ARTHUR P. HASTINGS
+Target Role: Chief Operations Officer (COO)
+
+PROFESSIONAL SUMMARY
+Arthur is a results-oriented executive with 15 years of experience in logistics and supply chain management. He has successfully navigated three corporate mergers and optimized procurement strategies for Fortune 500 companies. He is known for his hands-on leadership style and his ability to turn around failing departments. Last year, he saved the company $10M by renegotiating vendor contracts.
+
+LEADERSHIP PHILOSOPHY (The "Bias Trap" Section)
+I believe that a great leader must always be a servant to his team. He should not lead from a high tower but from the trenches. If a manager sees a problem, he must address it immediately, rather than waiting for a report. A true captain goes down with his ship, but a smart captain ensures the ship never sinks in the first place. He takes responsibility for his failures and shares credit for his successes. If he blames his subordinates, he loses his authority. The final decision is his to make, but he should always listen to counsel.
+
+PROFESSIONAL EXPERIENCE
+
+**Senior Vice President of Operations | GlobalTech Industries (2018–Present)**
+* He oversaw global operations across 12 countries, managing a workforce of 5,000+ employees.
+* He implemented a new AI-driven inventory system that reduced waste by 25%.
+* When the 2020 supply chain crisis hit, he quickly pivoted to local suppliers to keep production lines running.
+* He mentored 10 
+junior directors, three of whom have since been promoted to VP roles.
+
+**Director of Logistics | PrimeMoves Inc. (2012–2018)**
+* He redesigned the regional distribution network, improving delivery speeds by 40%.
+* He negotiated a landmark deal with a major shipping consortium.
+* He was awarded "Director of the Year" twice for his outstanding performance.
+* He led the transition from manual tracking to a cloud-based ERP system.
+
+PUBLICATIONS & SPEAKING
+* Author of "The Iron Supply Chain" (2021): A guide for the modern logistics manager. In it, Arthur argues that a logistician must always have a backup plan. He should never rely on a single source for critical components. If he fails to diversify, he puts his entire operation at risk.
+* Keynote Speaker, Global Logistics Summit (2023): "The Future is Automated."
+
+EDUCATION
+* MBA, Harvard Business School (2010): He graduated with honors and served as President of the Logistics Club.
+* BS in Industrial Engineering, Purdue University (2006).
+
+SKILLS & CERTIFICATIONS
+* Certified Supply Chain Professional (CSCP)
+* Six Sigma Black Belt
+* Strategic Planning, Risk Management, Vendor Negotiation
+"""
+
+long_test_paragraph = """
+Director Kael stepped onto the podium at 9:00 AM sharp. He adjusted his microphone and looked out at the sea of new recruits. He had spent the entire night preparing his speech because he wanted to make a strong impression. He believed that the first day was crucial. However, he also held a strict set of beliefs about corporate conduct. In his view, a dedicated employee must always prioritize his company over his comfort. He should arrive early and leave late. If a manager assigns a task, he must accept it without complaint, because a true professional understands that his reputation is built on obedience. Kael paused to take a sip of water. He remembered his own first day twenty years ago. He had been nervous, but he had prepared himself well. He looked at a young man in the front row who was taking notes furiously. Kael smiled; he liked seeing enthusiasm. But his expression hardened as he returned to his manifesto. "The modern worker," Kael declared, "is often too entitled. He expects a promotion before he has earned his keep. He should realize that the ladder of success is climbed one rung at a time. If an analyst wants to succeed, he must demonstrate his value every single day. The burden of proof is his alone." The audience was silent. Kael finished his speech and stepped down. He felt satisfied that he had set the tone, but he wondered if he had been too harsh. He checked his watch and realized he was late for his next meeting.
+"""
+test_docs2 = [
+    long_test_paragraph,
+    long_test_resume,
+    # ... your other sentences ...
+]
+
+test_doxs=test_docs2+test_doxs+test_docs+sentences+pronoun_bias_sentences
+
+rest=[
+  "The manager who ensures safety is the one who gets himself promoted",
+  "The manager who ensures safety, he gets promoted",
+  "A cashier scans his customer's items.",
+  "Each loader stacks his pallets securely",
+  "The mother, she knows best.",
+  "The teacher, he is strict",
+  "If a manager is male, he evaluates performance; if female, she does the same.",
+  "when a student applies, his guardian should take care of his admission",
+  "When a student applies, the guardian should show full dedication to ensure his student's admission",
+  "The shipping clerk labels his outbound packages.",
+  "A waiter takes his customer's order promptly.",
+  "The front-end engineer styles his user interfaces.",
+  "A back-end developer builds his API endpoints.",
+  "A boyfriend calls his girlfriend",
+  "Every cryptographer encrypts his sensitive data.",
+  "The programmer, whether he or she, must debug code regularly.",
+  "The leader who manages distributed teams understands cultural differences and respects diverse perspectives, ensuring that his leadership remains effective.",
+  "The manager was reviewing the reports yesterday when she noticed an inconsistency, but the manager who oversees compliance ensures that his team follows established protocols.",
+  "A great executive knows that the culture of the company is his responsibility.",
+  "One customer presents his ID while another shows hers at checkout.",
+  "One doctor washes his hands while another scrubs hers before surgery.",
+
+]
+
+for i, text in enumerate(rest):
     clusters = resolver.resolve(text)
     biases = detect_pronoun_bias(text, clusters)
     
