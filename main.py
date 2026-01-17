@@ -2532,6 +2532,87 @@ rest=[
 
 ]
 
+test_stress_inputs = [
+
+"""
+Kael Verner arrived at the manufacturing plant just before sunrise, his coat still damp from the morning fog. 
+He had worked at this facility for nearly two decades, and he remembered a time when every machine had to be 
+checked manually before the first shift began. He walked through the assembly line, greeting workers by name, 
+recalling how he had once stood exactly where they stood now. The memories were vivid: the clatter of tools, 
+the pressure of deadlines, the pride of finishing a difficult build.
+
+Yet Kael also carried a philosophy that he repeated often in meetings. In his view, a good manager ensures 
+that his team operates efficiently regardless of external pressure. He believes that a leader sets the tone 
+for discipline and accountability, and if a supervisor ignores small mistakes, his authority slowly erodes. 
+A responsible engineer documents his work carefully, because errors compound over time. When a technician 
+cuts corners, he risks more than his reputation; he risks the safety of everyone around him.
+
+Later that morning, Kael met with a junior analyst who had joined the company only weeks earlier. The analyst 
+was nervous, fumbling with his notes, but Kael reassured him. He explained that everyone struggles at first, 
+and that experience is earned through persistence. Still, Kael reminded him of a rule he often repeated: 
+when an employee is assigned a task, he must see it through completely. Excuses weaken trust. Results build it.
+
+As the day ended, Kael returned to his office, reflecting on how different leadership felt in theory versus 
+practice. He smiled, knowing that while principles guide decisions, real leadership is tested in moments of 
+fatigue, uncertainty, and responsibility.
+""",
+
+"""
+In organizational theory, a manager coordinates resources to achieve defined objectives while maintaining 
+accountability across teams. A project leader identifies risks early and ensures that his strategy adapts to 
+changing constraints. When a department head communicates expectations clearly, he reduces ambiguity and 
+improves execution. Conversely, when a supervisor avoids responsibility, his team often mirrors that behavior.
+
+A skilled professional understands that competence is not static. An engineer refines his methods continually, 
+a designer evaluates his assumptions critically, and a developer reviews his code before deployment. In many 
+industries, a specialist protects his credibility by adhering to standards rather than shortcuts. If a worker 
+fails to uphold these principles, he undermines both trust and performance.
+
+From a systemic perspective, an organization functions best when each role fulfills its obligations. A mentor 
+guides his trainees patiently, a reviewer challenges his peers constructively, and a decision-maker accepts 
+that the final outcome is his responsibility. These patterns are not tied to individuals but to roles, forming 
+the backbone of sustainable professional culture.
+""",
+
+"""
+RESUME: ARJUN MALHOTRA
+Target Role: Senior Operations Manager
+
+PROFESSIONAL SUMMARY
+Arjun Malhotra is a seasoned operations professional with over 14 years of experience in logistics, procurement, 
+and process optimization. He has led cross-functional teams in high-pressure environments and delivered 
+measurable improvements in efficiency and cost control. He is known for his analytical mindset and his ability 
+to translate strategy into execution.
+
+PROFESSIONAL EXPERIENCE
+
+Operations Manager | NovaSupply Corp (2019–Present)
+Arjun managed regional distribution centers across five states. He implemented inventory forecasting models 
+that reduced waste by 18%. During the 2021 supply disruption, he coordinated alternative sourcing strategies 
+and ensured continuity of service. He mentored junior managers and reviewed their performance quarterly.
+
+Senior Logistics Analyst | Axis Freight Solutions (2014–2019)
+He analyzed shipment data to identify bottlenecks and proposed routing optimizations that improved delivery 
+times by 22%. He collaborated with IT teams to deploy a tracking dashboard used company-wide. He was recognized 
+twice for operational excellence.
+
+Leadership Philosophy
+Arjun believes that an effective manager supports his team while holding them accountable. He maintains that 
+a leader earns trust by consistency, not authority alone. When a supervisor delegates responsibility, he must 
+also provide clarity. If a manager avoids difficult decisions, he weakens his credibility. A strong leader 
+knows that the success of the organization is ultimately his responsibility, and he must act accordingly.
+
+Education
+MBA, Operations Management — Indian Institute of Management
+B.Tech, Industrial Engineering — National Institute of Technology
+
+Certifications
+Lean Six Sigma Black Belt
+Certified Supply Chain Professional (CSCP)
+"""
+]
+
+
 d=test_docs+test_doxs+rest
 for i, text in enumerate(rest):
     clusters = resolver.resolve(text)
