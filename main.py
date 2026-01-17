@@ -2441,7 +2441,7 @@ sentences = [
  
     # print(len(sentences))
 
-# test_docs=test_docs+sentences+pronoun_bias_sentences
+test_docs=test_docs+sentences+pronoun_bias_sentences
 test_doxs= [
   "The leader who manages distributed teams understands cultural differences and respects diverse perspectives, ensuring that his leadership remains effective.",
   "The manager was reviewing the reports yesterday when she noticed an inconsistency, but the manager who oversees compliance ensures that his team follows established protocols.",
@@ -2505,7 +2505,7 @@ test_docs2 = [
     # ... your other sentences ...
 ]
 
-test_doxs=test_docs2+test_doxs+test_docs+sentences+pronoun_bias_sentences
+test_doxs=test_docs2+test_doxs
 
 rest=[
   "The manager who ensures safety is the one who gets himself promoted",
@@ -2532,7 +2532,8 @@ rest=[
 
 ]
 
-for i, text in enumerate(rest):
+d=test_docs+test_doxs+rest
+for i, text in enumerate(d):
     clusters = resolver.resolve(text)
     biases = detect_pronoun_bias(text, clusters)
     
