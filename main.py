@@ -2614,7 +2614,7 @@ Certified Supply Chain Professional (CSCP)
 
 
 d=test_docs+test_doxs+rest
-for i, text in enumerate(rest):
+for i, text in enumerate(test_stress_inputs):
     clusters = resolver.resolve(text)
     biases = detect_pronoun_bias(text, clusters)
     
