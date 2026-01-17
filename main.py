@@ -2533,7 +2533,7 @@ rest=[
 ]
 
 d=test_docs+test_doxs+rest
-for i, text in enumerate(d):
+for i, text in enumerate(rest):
     clusters = resolver.resolve(text)
     biases = detect_pronoun_bias(text, clusters)
     
