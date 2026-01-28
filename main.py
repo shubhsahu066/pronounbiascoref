@@ -1,17 +1,62 @@
-# main.py
 from coref_solver import CorefResolver
 from bias_detector import detect_pronoun_bias
-from visualizer import create_html_report
+
+# =========================
+# CONFIG
+# =========================
+GENERATE_HTML = True  
+
+if GENERATE_HTML:
+    from visualizer import create_html_report
+
 
 print("Loading FastCoref model...")
-resolver = CorefResolver(device='cpu') 
-
-# ... (Keep your test_docs list here) ...
+resolver = CorefResolver(device='cpu')
 
 print("\n--- RUNNING ANALYSIS ---")
-results_for_report = []
 
-# 2. Test Cases (Using the advanced set we verified)
+
+def analyze_sentences_return_structured_spans(sentences, resolver):
+    """
+    sentences: List[str]
+
+    returns: List[dict] like:
+    {
+        "text": str,
+        "spans": [
+            {"start": int, "end": int, "type": "PRONOUN"}
+        ],
+        "bias_type": "PRONOUN" | None
+    }
+    """
+    results = []
+
+    for text in sentences:
+        clusters = resolver.resolve(text)
+        biases = detect_pronoun_bias(text, clusters)
+
+        spans = [
+            {
+                "start": b["start"],
+                "end": b["end"],
+                "type": "PRONOUN"
+            }
+            for b in biases
+        ]
+
+        results.append({
+            "text": text,
+            "spans": spans,
+            "bias_type": "PRONOUN" if spans else None
+        })
+
+    return results
+
+
+# =========================
+# TEST INPUTS 
+# =========================
+
 test_docs = [
     # Safe
     "The doctor arrived late. He was tired from the shift.",
@@ -2614,22 +2659,46 @@ Certified Supply Chain Professional (CSCP)
 
 
 d=test_docs+test_doxs+rest
-for i, text in enumerate(test_stress_inputs):
-    clusters = resolver.resolve(text)
-    biases = detect_pronoun_bias(text, clusters)
-    
-    # Collect data for visualizer
-    bias_spans = [(b['start'], b['end'], b['text']) for b in biases]
-    results_for_report.append({
-        'text': text,
-        'biases': bias_spans
-    })
-    
-    # Console Output (Optional, since we now have HTML)
-    if biases:
-        print(f"Doc {i+1}: BIAS DETECTED ({len(biases)} triggers)")
+
+# =========================
+# RUN ANALYSIS
+# =========================
+
+structured_results = analyze_sentences_return_structured_spans(
+    test_stress_inputs,
+    resolver
+)
+
+# Optional console output
+for i, item in enumerate(structured_results):
+    if item["spans"]:
+        print(f"Doc {i+1}: BIAS DETECTED ({len(item['spans'])} triggers)")
     else:
         print(f"Doc {i+1}: SAFE")
 
-# Generate HTML
-create_html_report(results_for_report)
+# =========================
+# OPTIONAL HTML 
+# =========================
+
+if GENERATE_HTML:
+    results_for_report = []
+    for item in structured_results:
+        text = item["text"]
+        biases = [
+            (s["start"], s["end"], text[s["start"]:s["end"]])
+            for s in item["spans"]
+        ]
+        results_for_report.append({
+            "text": text,
+            "biases": biases
+        })
+
+    create_html_report(results_for_report)
+
+
+# =========================
+# FINAL OUTPUT 
+# =========================
+
+print("\nStructured Output:")
+print(structured_results)
